@@ -329,8 +329,8 @@ controls.enableRotate = true;
 controls.enableZoom = true;
 controls.enablePan = false;
 
-controls.minDistance = 0.2;
-controls.maxDistance = 10;
+controls.minDistance = 0.5;
+controls.maxDistance = 2.0;
 
 
 // ─────────────────────────────────────────────
