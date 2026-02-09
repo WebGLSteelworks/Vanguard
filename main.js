@@ -4,11 +4,11 @@ import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.176.0/examples/
 import { RGBELoader } from 'https://cdn.jsdelivr.net/npm/three@0.176.0/examples/jsm/loaders/RGBELoader.js/+esm';
 
 import { MODEL_CONFIG as BLACK_PRIZM_ROAD } from './configs/black_prizm_road.js';
-import { MODEL_CONFIG as MATTE_BLACK_CLEAR } from './configs/matte_black_clear.js';
-import { MODEL_CONFIG as SHINY_BLACK_GREEN } from './configs/shiny_black_green.js';
-import { MODEL_CONFIG as MATTE_BLACK_GGRAPH } from './configs/matte_black_ggraph.js';
-import { MODEL_CONFIG as SHINY_BLACK_CGREEN } from './configs/shiny_black_cgreen.js';
-import { MODEL_CONFIG as MATTE_BLACK_CGREY } from './configs/matte_black_cgrey.js';
+//import { MODEL_CONFIG as MATTE_BLACK_CLEAR } from './configs/matte_black_clear.js';
+//import { MODEL_CONFIG as SHINY_BLACK_GREEN } from './configs/shiny_black_green.js';
+//import { MODEL_CONFIG as MATTE_BLACK_GGRAPH } from './configs/matte_black_ggraph.js';
+//import { MODEL_CONFIG as SHINY_BLACK_CGREEN } from './configs/shiny_black_cgreen.js';
+//import { MODEL_CONFIG as MATTE_BLACK_CGREY } from './configs/matte_black_cgrey.js';
 
 // ─────────────────────────────────────────────
 // VAR
