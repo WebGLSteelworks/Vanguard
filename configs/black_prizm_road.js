@@ -3,17 +3,17 @@ export const MODEL_CONFIG = {
   glb: './models/black_prizm_road.glb',
 
   glass: {
-	  color: [0.18, 0.12, 0.22],
-	  roughness: 0.08,
-	  metalness: 0.0,
-	  opacity: 0.55,
+	  color: [0.3, 0.12, 0.45],   
+	  roughness: 1.0,
+	  metalness: 1.5,
+	  opacity: 0.97,
 
 	  fresnel: {
 		enabled: true,
-		intensity: 1.5,
-		colorFront: [0.55, 0.25, 0.8],
-		colorMid:   [0.85, 0.15, 0.25],
-		colorEdge:  [1.0, 0.85, 0.2]
+		intensity: 0.3,           
+		colorFront: [0.6, 0.25, 0.9],
+		colorMid:   [1.0, 0.1, 0.3],
+		colorEdge:  [1.0, 0.9, 0.2]
 	  }
 	},
 

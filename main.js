@@ -142,22 +142,24 @@ function loadModel(config) {
 		// ───── glass
 		if (obj.isMesh && obj.material?.name?.toLowerCase().includes('glass')) {
 
-		  const mat = new THREE.MeshPhysicalMaterial({
-			  color: new THREE.Color(0.05, 0.05, 0.05),
-			  roughness: 0.05,
-			  metalness: 0.0,
+			const g = config.glass;
+
+			const mat = new THREE.MeshPhysicalMaterial({
+			  color: new THREE.Color(...g.color),
+			  roughness: g.roughness,
+			  metalness: g.metalness ?? 0.0,
 
 			  transparent: true,
-			  alphaTest: 0.01,
-			  opacity: 0.85,
+			  opacity: g.opacity,
+
 			  transmission: 0.0,
 			  ior: 1.45,
-
 			  depthWrite: false,
+			  depthTest: true,
 
-			  // 🔑 CLAVE
-			  envMapIntensity: 2.2
+			  envMapIntensity: 0.0
 			});
+
 			
 			mat.specularIntensity = 1.0;
 			mat.specularColor = new THREE.Color(1.0, 1.0, 1.0);
@@ -169,16 +171,16 @@ function loadModel(config) {
 			const alphaTex = textureLoader.load(config.glass.opacityMap);
 			alphaTex.flipY = false;
 			alphaTex.colorSpace = THREE.NoColorSpace;
-			mat.alphaMap = alphaTex;
-			mat.alphaTest = 0.01;
+			//mat.alphaMap = alphaTex;
+			//mat.alphaTest = 0.01;
 		  }
 		  
 		  
 
 		  // ───── LOGO
-		  mat.emissiveMap = logoTexture;
-		  mat.emissive = new THREE.Color(1, 1, 1);
-		  mat.emissiveIntensity = 0.6;
+		  //mat.emissiveMap = logoTexture;
+		  //mat.emissive = new THREE.Color(1, 1, 1);
+		  //mat.emissiveIntensity = 0.6;
 
 		  // ───── FRESNEL CROMÁTICO
 		  if (config.glass.fresnel?.enabled) {
@@ -214,22 +216,20 @@ function loadModel(config) {
 
 			float f = pow(
 			  1.0 - dot(geometryNormal, normalize(vViewPosition)),
-			  0.8
+			  0.99
 			);
 
-			vec3 fresnelColor = mix(
+			vec3 coatingColor = mix(
 			  colorFront,
-			  mix(colorMid, colorEdge, smoothstep(0.3, 0.9, f)),
-			  smoothstep(0.02, 0.6, f)
+			  mix(colorMid, colorEdge, smoothstep(0.1, 1.0, f)),
+			  smoothstep(0.0, 0.3, f)
 			);
 
-			reflectedLight.indirectSpecular.rgb += fresnelColor * f * fresnelIntensity;
-
-			vec3 frontTint = colorFront * (1.0 - f) * 0.35;
+			// saturación fuerte
+			coatingColor = pow(coatingColor, vec3(1.6));
 
 			reflectedLight.indirectSpecular.rgb +=
-			  frontTint +
-			  fresnelColor * f * fresnelIntensity;
+			  coatingColor * f * fresnelIntensity;
 
 			`
 		  );
@@ -241,7 +241,9 @@ function loadModel(config) {
 		  originalGlassColors.push(mat.color.clone());
 		  obj.material = mat;
 		}
-		}	
+		}
+
+
 	  });
 
 	  // ───── start camera (FUERA del traverse)
@@ -309,6 +311,8 @@ let transition = {
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.6;
 renderer.physicallyCorrectLights = true;
 document.body.appendChild(renderer.domElement);
 
@@ -332,8 +336,8 @@ controls.maxDistance = 10;
 // ─────────────────────────────────────────────
 // LIGHTING
 // ─────────────────────────────────────────────
-scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
+scene.add(new THREE.AmbientLight(0xffffff, 0.0));
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.0);
 dirLight.position.set(5, 10, 7);
 scene.add(dirLight);
 
@@ -345,7 +349,7 @@ const pmrem = new THREE.PMREMGenerator(renderer);
 new RGBELoader().load('./studio.hdr', (hdr) => {
   const envMap = pmrem.fromEquirectangular(hdr).texture;
   scene.environment = envMap;
-  scene.environmentIntensity = 1.5;
+  scene.environmentIntensity = 0.7;
   hdr.dispose();
 });
 
