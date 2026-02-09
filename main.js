@@ -349,6 +349,7 @@ const pmrem = new THREE.PMREMGenerator(renderer);
 new RGBELoader().load('./studio.hdr', (hdr) => {
   const envMap = pmrem.fromEquirectangular(hdr).texture;
   scene.environment = envMap;
+  scene.environmentRotation = new THREE.Euler(0, Math.PI * 0.7, 0);
   scene.environmentIntensity = 0.7;
   hdr.dispose();
 });
