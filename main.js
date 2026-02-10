@@ -4,11 +4,10 @@ import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.176.0/examples/
 import { RGBELoader } from 'https://cdn.jsdelivr.net/npm/three@0.176.0/examples/jsm/loaders/RGBELoader.js/+esm';
 
 import { MODEL_CONFIG as BLACK_PRIZM_ROAD } from './configs/black_prizm_road.js';
-//import { MODEL_CONFIG as MATTE_BLACK_CLEAR } from './configs/matte_black_clear.js';
-//import { MODEL_CONFIG as SHINY_BLACK_GREEN } from './configs/shiny_black_green.js';
-//import { MODEL_CONFIG as MATTE_BLACK_GGRAPH } from './configs/matte_black_ggraph.js';
-//import { MODEL_CONFIG as SHINY_BLACK_CGREEN } from './configs/shiny_black_cgreen.js';
-//import { MODEL_CONFIG as MATTE_BLACK_CGREY } from './configs/matte_black_cgrey.js';
+import { MODEL_CONFIG as WHITE_PRIZM_SAPPHIRE } from './configs/white_prizm_sapphire.js';
+import { MODEL_CONFIG as BLACK_PRIZM_24K } from './configs/black_prizm_24k.js';
+import { MODEL_CONFIG as WHITE_PRIZM_BLACK } from './configs/white_prizm_black.js';
+
 
 // ─────────────────────────────────────────────
 // VAR
@@ -74,11 +73,10 @@ function makeModelButton(label, config) {
 }
 
 makeModelButton('Black Prizm Road', BLACK_PRIZM_ROAD);
-//makeModelButton('Matte Black Clear', MATTE_BLACK_CLEAR);
-//makeModelButton('Shiny Black Green', SHINY_BLACK_GREEN);
-//makeModelButton('Matte Black Gradient Graphite', MATTE_BLACK_GGRAPH);
-//makeModelButton('Shiny Black Clear to Green', SHINY_BLACK_CGREEN);
-//makeModelButton('Matte Black Clear to Grey', MATTE_BLACK_CGREY);
+makeModelButton('White Prizm Sapphire', WHITE_PRIZM_SAPPHIRE);
+makeModelButton('Black Prizm 24k', BLACK_PRIZM_24K);
+makeModelButton('White Prizm Black', WHITE_PRIZM_BLACK);
+
 
 
 // ─────────────────────────────
@@ -344,7 +342,7 @@ controls.maxDistance = 2.0;
 // LIGHTING
 // ─────────────────────────────────────────────
 scene.add(new THREE.AmbientLight(0xffffff, 0.0));
-const dirLight = new THREE.DirectionalLight(0xffffff, 0.0);
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
 dirLight.position.set(5, 10, 7);
 scene.add(dirLight);
 
@@ -356,8 +354,8 @@ const pmrem = new THREE.PMREMGenerator(renderer);
 new RGBELoader().load('./studio.hdr', (hdr) => {
   const envMap = pmrem.fromEquirectangular(hdr).texture;
   scene.environment = envMap;
-  scene.environmentRotation = new THREE.Euler(0, Math.PI * 0.7, 0);
-  scene.environmentIntensity = 0.7;
+  scene.environmentRotation = new THREE.Euler(0, Math.PI * 1.35, 0);
+  scene.environmentIntensity = 0.3;
   hdr.dispose();
 });
 
