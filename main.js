@@ -142,6 +142,7 @@ function loadModel(config) {
 		// ───── glass
 		if (obj.isMesh && obj.material?.name?.toLowerCase().includes('glass')) {
 
+
 			const g = config.glass;
 
 			const mat = new THREE.MeshPhysicalMaterial({
@@ -171,16 +172,9 @@ function loadModel(config) {
 			const alphaTex = textureLoader.load(config.glass.opacityMap);
 			alphaTex.flipY = false;
 			alphaTex.colorSpace = THREE.NoColorSpace;
-			//mat.alphaMap = alphaTex;
-			//mat.alphaTest = 0.01;
-		  }
-		  
-		  
 
-		  // ───── LOGO
-		  //mat.emissiveMap = logoTexture;
-		  //mat.emissive = new THREE.Color(1, 1, 1);
-		  //mat.emissiveIntensity = 0.6;
+		  }
+  
 
 		  // ───── FRESNEL CROMÁTICO
 		  if (config.glass.fresnel?.enabled) {
@@ -243,7 +237,20 @@ function loadModel(config) {
 		}
 		}
 
+		if (!obj.isMesh || !obj.material) return;
 
+		  // 🟢 LOGO CUTOUT
+		  if (obj.material.name.toLowerCase().includes('logo')) {
+
+			const mat = obj.material;
+
+			mat.transparent = false;
+			mat.alphaTest = 0.5;
+			mat.depthWrite = true;
+			mat.side = THREE.FrontSide;
+
+			mat.needsUpdate = true;
+		  }
 	  });
 
 	  // ───── start camera (FUERA del traverse)
