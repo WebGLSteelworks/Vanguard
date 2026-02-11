@@ -19,12 +19,6 @@ import { MODEL_CONFIG as WHITE_PRIZM_BLACK } from './configs/white_prizm_black.j
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xf2f2f2); 
 
-//const logoTexture = new THREE.TextureLoader().load('./textures/Coperni_alpha.jpg');
-//const textureLoader = new THREE.TextureLoader();
-
-//logoTexture.colorSpace = THREE.SRGBColorSpace;
-//logoTexture.flipY = false; // flip glTF
-
 const cameras = {};
 
 const clock = new THREE.Clock();
@@ -290,7 +284,7 @@ function loadModel(config) {
 
 
 // ─────────────────────────────
-// GLASS ANIMATION
+// GLASS (GLOBAL)
 // ─────────────────────────────
 const glassAnim = {
   state: 'waitGreen',
@@ -300,11 +294,6 @@ const glassAnim = {
   waitGreen: 1.0,
   waitClear: 1.0
 };
-
-
-// ─────────────────────────────
-// GLASS MAT (GLOBAL)
-// ─────────────────────────────
 const glassMaterials = [];
 const originalGlassColors = [];
 
@@ -396,9 +385,9 @@ controls.maxDistance = 2.0;
 // ─────────────────────────────────────────────
 // LIGHTING
 // ─────────────────────────────────────────────
-scene.add(new THREE.AmbientLight(0xffffff, 0.0));
-const dirLight = new THREE.DirectionalLight(0xffffff, 2.8);
-dirLight.position.set(5, 10, 7);
+scene.add(new THREE.AmbientLight(0xffffff, 2.0));
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.0);
+dirLight.position.set(0, 0, 0);
 scene.add(dirLight);
 
 // ─────────────────────────────────────────────
