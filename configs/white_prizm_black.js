@@ -1,6 +1,6 @@
 export const MODEL_CONFIG = {
   name: 'Matte',
-  glb: './models/w_prizm.glb',
+  glb: './models/white_prizm_black.glb',
 
   glass: {
 	  color: [0.4, 0.4, 0.4],   
