@@ -1,18 +1,18 @@
 export const MODEL_CONFIG = {
   name: 'Matte',
-  glb: './models/white_prizm_sapphire.glb',
+  glb: './models/w_prizm.glb',
 
   glass: {
-	  color: [0.2, 0.2, 0.2],   
-	  roughness: 0.3,
-	  metalness: 0.1,
-	  opacity: 0.97,
+	  color: [0.4, 0.4, 0.4],   
+	  roughness: 0.2,
+	  metalness: 0.5,
+	  opacity: 0.90,
 
 	  fresnel: {
 		enabled: true,
-		intensity: 0.15,           
-		colorFront: [0.2, 0.2, 0.2],
-		colorMid:   [0.1, 0.1, 0.1],
+		intensity: 3.7,           
+		colorFront: [0.4, 0.4, 0.4],
+		colorMid:   [0.2, 0.2, 0.2],
 		colorEdge:  [0.0, 0.0, 0.0]
 	  }
 	},

@@ -3,6 +3,10 @@ import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.176.0/exampl
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.176.0/examples/jsm/loaders/GLTFLoader.js/+esm';
 import { RGBELoader } from 'https://cdn.jsdelivr.net/npm/three@0.176.0/examples/jsm/loaders/RGBELoader.js/+esm';
 
+import { EffectComposer } from 'https://cdn.jsdelivr.net/npm/three@0.176.0/examples/jsm/postprocessing/EffectComposer.js/+esm';
+import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three@0.176.0/examples/jsm/postprocessing/RenderPass.js/+esm';
+import { ShaderPass } from 'https://cdn.jsdelivr.net/npm/three@0.176.0/examples/jsm/postprocessing/ShaderPass.js/+esm';
+
 import { MODEL_CONFIG as BLACK_PRIZM_ROAD } from './configs/black_prizm_road.js';
 import { MODEL_CONFIG as WHITE_PRIZM_SAPPHIRE } from './configs/white_prizm_sapphire.js';
 import { MODEL_CONFIG as BLACK_PRIZM_24K } from './configs/black_prizm_24k.js';
@@ -15,11 +19,11 @@ import { MODEL_CONFIG as WHITE_PRIZM_BLACK } from './configs/white_prizm_black.j
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xf2f2f2); 
 
-const logoTexture = new THREE.TextureLoader().load('./textures/Coperni_alpha.jpg');
-const textureLoader = new THREE.TextureLoader();
+//const logoTexture = new THREE.TextureLoader().load('./textures/Coperni_alpha.jpg');
+//const textureLoader = new THREE.TextureLoader();
 
-logoTexture.colorSpace = THREE.SRGBColorSpace;
-logoTexture.flipY = false; // flip glTF
+//logoTexture.colorSpace = THREE.SRGBColorSpace;
+//logoTexture.flipY = false; // flip glTF
 
 const cameras = {};
 
@@ -77,6 +81,33 @@ makeModelButton('White Prizm Sapphire', WHITE_PRIZM_SAPPHIRE);
 makeModelButton('Black Prizm 24k', BLACK_PRIZM_24K);
 makeModelButton('White Prizm Black', WHITE_PRIZM_BLACK);
 
+// ─────────────────────────────
+// POSTPRODUCTION FOR MORE CONTRAST
+// ─────────────────────────────
+
+const ContrastShader = {
+  uniforms: {
+    tDiffuse: { value: null },
+    contrast: { value: 1.0 } // 1.0 = neutro
+  },
+  vertexShader: `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+    }
+  `,
+  fragmentShader: `
+    uniform sampler2D tDiffuse;
+    uniform float contrast;
+    varying vec2 vUv;
+    void main() {
+      vec4 color = texture2D(tDiffuse, vUv);
+      color.rgb = (color.rgb - 0.5) * contrast + 0.5;
+      gl_FragColor = color;
+    }
+  `
+};
 
 
 // ─────────────────────────────
@@ -156,7 +187,7 @@ function loadModel(config) {
 			  depthWrite: false,
 			  depthTest: true,
 
-			  envMapIntensity: 0.0
+			  envMapIntensity: 1.3
 			});
 
 			
@@ -314,12 +345,36 @@ let transition = {
 // RENDERER
 // ─────────────────────────────────────────────
 const renderer = new THREE.WebGLRenderer({ antialias: true });
+
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.6;
+renderer.toneMappingExposure = 1.0;
 renderer.physicallyCorrectLights = true;
 document.body.appendChild(renderer.domElement);
+
+// ─────────────────────────────
+// COMPOSER ANTIALIASING
+// ─────────────────────────────
+
+const renderTarget = new THREE.WebGLRenderTarget(
+  window.innerWidth,
+  window.innerHeight,
+  {
+    samples: 4 
+  }
+);
+
+const composer = new EffectComposer(renderer, renderTarget);
+
+composer.addPass(new RenderPass(scene, camera));
+
+const contrastPass = new ShaderPass(ContrastShader);
+contrastPass.uniforms.contrast.value = 1.0;
+composer.addPass(contrastPass);
+
 
 // ─────────────────────────────────────────────
 // CONTROLS
@@ -342,7 +397,7 @@ controls.maxDistance = 2.0;
 // LIGHTING
 // ─────────────────────────────────────────────
 scene.add(new THREE.AmbientLight(0xffffff, 0.0));
-const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+const dirLight = new THREE.DirectionalLight(0xffffff, 2.8);
 dirLight.position.set(5, 10, 7);
 scene.add(dirLight);
 
@@ -352,12 +407,69 @@ scene.add(dirLight);
 const pmrem = new THREE.PMREMGenerator(renderer);
 
 new RGBELoader().load('./studio.hdr', (hdr) => {
-  const envMap = pmrem.fromEquirectangular(hdr).texture;
-  scene.environment = envMap;
+
+  // 🔹 Creamos una escena temporal para procesar el HDR
+  const tempScene = new THREE.Scene();
+
+  const saturation = 0.0; // 0 = gris total | 1 = original
+
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      tMap: { value: hdr },
+      saturation: { value: saturation }
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform sampler2D tMap;
+      uniform float saturation;
+      varying vec2 vUv;
+
+      void main() {
+        vec4 color = texture2D(tMap, vUv);
+
+        float luminance = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+        vec3 grey = vec3(luminance);
+
+        color.rgb = mix(grey, color.rgb, saturation);
+
+        gl_FragColor = color;
+      }
+    `,
+    side: THREE.DoubleSide
+  });
+
+  const quad = new THREE.Mesh(
+    new THREE.PlaneGeometry(2, 2),
+    material
+  );
+
+  tempScene.add(quad);
+
+  const renderTarget = new THREE.WebGLRenderTarget(
+    hdr.image.width,
+    hdr.image.height
+  );
+
+  renderer.setRenderTarget(renderTarget);
+  renderer.render(tempScene, new THREE.Camera());
+  renderer.setRenderTarget(null);
+
+  const processedEnvMap = pmrem.fromEquirectangular(renderTarget.texture).texture;
+
+  scene.environment = processedEnvMap;
   scene.environmentRotation = new THREE.Euler(0, Math.PI * 1.35, 0);
-  scene.environmentIntensity = 0.3;
+  scene.environmentIntensity = 1.5;
+
   hdr.dispose();
+  renderTarget.dispose();
 });
+
 
 function smoothSwitchCamera(name) {
   activeCameraName = name;
@@ -406,10 +518,16 @@ function smoothSwitchCamera(name) {
 // RESIZE
 // ─────────────────────────────────────────────
 window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+
+  camera.aspect = width / height;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  renderer.setSize(width, height);
+  composer.setSize(width, height);
 });
+
 
 // ─────────────────────────────────────────────
 // LOOP ANIMATE
@@ -538,7 +656,9 @@ function animate(time) {
   // ─────────────────────────────────────────
   // RENDER
   // ─────────────────────────────────────────
-  renderer.render(scene, camera);
+  
+  composer.render();
+
 }
 
 
