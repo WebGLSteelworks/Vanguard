@@ -4,7 +4,7 @@ export const MODEL_CONFIG = {
 
   glass: {
 	  color: [0.46, 0.68, 0.78],   
-	  roughness: 0.2,
+	  roughness: 0.1,
 	  metalness: 0.5,
 	  opacity: 0.90,
 
