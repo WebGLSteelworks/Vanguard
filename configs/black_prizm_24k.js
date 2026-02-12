@@ -17,6 +17,20 @@ export const MODEL_CONFIG = {
 	  }
 	},
 
+  tras: {
+	  enabled: true,
+
+	  color: [1.0, 1.0, 1.0],     // tono cálido translúcido
+	  roughness: 0.1,              // bajo → nitidez
+	  transmission: 1.0,
+	  thickness: 0.5,               // importante
+	  ior: 1.1,                    // policarbonato real
+
+	  attenuationColor: [1.0, 1.0, 1.0],
+	  attenuationDistance: 5.5,
+
+	  envMapIntensity: 2.7
+	},
 
   startCamera: 'Cam_Front',
   freeCamera: 'Cam_Free'

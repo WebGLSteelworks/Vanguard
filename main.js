@@ -135,7 +135,8 @@ function loadModel(config) {
   glassAnim.timer = 0;
   Object.keys(cameraTargets).forEach(k => delete cameraTargets[k]);
 
-	loader.load(config.glb, (gltf) => {
+	loader.load(config.glb + '?v=' + Date.now(), (gltf) => {
+	//loader.load(config.glb, (gltf) => {
 
 	  currentModel = gltf.scene;
 	  scene.add(currentModel);
@@ -164,8 +165,7 @@ function loadModel(config) {
 
 		// ───── glass
 		if (obj.isMesh && obj.material?.name?.toLowerCase().includes('glass')) {
-
-
+			
 			const g = config.glass;
 
 			const mat = new THREE.MeshPhysicalMaterial({
@@ -260,6 +260,51 @@ function loadModel(config) {
 		}
 		}
 
+		// ───── TRANSLUCENT (TRAS)
+		if (
+		  obj.isMesh &&
+		  obj.material?.name?.toLowerCase().includes('tres') &&
+		  config.tras
+		) {
+
+		  const t = config.tras;
+		  const original = obj.material;
+
+		  const mat = new THREE.MeshPhysicalMaterial({
+
+			// 🔹 mantener texturas originales
+			map: original.map || null,
+			normalMap: original.normalMap || null,
+			roughnessMap: original.roughnessMap || null,
+			metalnessMap: original.metalnessMap || null,
+			aoMap: original.aoMap || null,
+			emissiveMap: original.emissiveMap || null,
+
+			// 🔹 mantener color base si existe
+			color: original.color ? original.color.clone() : new THREE.Color(...t.color),
+
+			metalness: 0.0,
+			roughness: t.roughness,
+			transmission: t.transmission,
+			thickness: t.thickness,
+			ior: t.ior,
+
+			transparent: true,
+			opacity: 1.0,
+
+			envMapIntensity: t.envMapIntensity ?? 1.0,
+
+			attenuationColor: new THREE.Color(...t.attenuationColor),
+			attenuationDistance: t.attenuationDistance
+		  });
+
+		  obj.material = mat;
+		}
+
+
+
+
+
 		if (!obj.isMesh || !obj.material) return;
 
 		  // 🟢 LOGO CUTOUT
@@ -334,6 +379,9 @@ let transition = {
 // RENDERER
 // ─────────────────────────────────────────────
 const renderer = new THREE.WebGLRenderer({ antialias: true });
+
+renderer.useLegacyLights = false;
+renderer.transmissionResolutionScale = 1.0;
 
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
@@ -647,6 +695,10 @@ function animate(time) {
   // ─────────────────────────────────────────
   
   composer.render();
+  //renderer.render(scene, camera);
+
+
+
 
 }
 
